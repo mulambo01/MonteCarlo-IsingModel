@@ -1,1 +1,1 @@
-#MonteCarloIsing
+#Monte Carlo Ising
