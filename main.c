@@ -19,7 +19,6 @@ mtx genSpins(int nrow, int ncol, float bound){
    }
    else{
    	value=-1;
-   	value=1;
    }
 			Spins.data[i][j]=value;
 		}
@@ -89,58 +88,76 @@ float magnet(mtx spins){
 	}
 	return(mag/(Nrow*Ncol));
 }
-void reUpSpins(mtx spins){
+void setSpins(mtx spins, float value){
  int nrow=spins.nrows;
 	int ncol=spins.ncols;
  int i, j;
-	for(i=1; i<nrow; i++){
-		for(j=1; j<ncol; j++){
-			spins.data[i][j]=1.0;
+	for(i=1; i<nrow-1; i++){
+		for(j=1; j<ncol-1; j++){
+			spins.data[i][j]=value;
 		}
 	}
 }
 
+void setBound(mtx spins, float* bound){
+ float left=bound[0], right=bound[1], down=bound[2], up=bound[3];
+ int i;
+ int ncol=spins.ncols, nrow=spins.nrows;
+ for(i=1; i<nrow-1; i++){
+ 	spins.data[i][0]=left;
+ 	spins.data[i][ncol-1]=right;
+ }
+ for(i=1; i<ncol-1; i++){
+ 	spins.data[0][i]=up;
+ 	spins.data[nrow-1][i]=down;
+ }
+}
+
 int main(){
-srand(4);
-int Nrow=100, Ncol=100, qtsteps=40, stepTerm=90;
-float Tstart=0.01, Tstop=10.1, dT=0.2, T;
-float hstart=-5.0, hstop=5.0, dh=1.0,h=0.0;
-mtx Spins=genSpins(Nrow, Ncol,1.0), oldSpins;
-int i;
-int j=0;
-char filename[100];
-int jlim=50;
-mtx ene=nullmatrix(qtsteps, 2);
-mtx mag=nullmatrix(jlim, 2);
+ srand(98);
+ int Nrow=1, Ncol=10;
+ int qtsteps=50000;
+ float beta, betaStart, betaStop, dbeta,T,Tstart,Tstop,dT,h;
 
-float beta, betaStart=0.01, dbeta=0.02;
-beta=betaStart;
-for(j=0;j<jlim;j++){
-	reUpSpins(Spins);
- T=1.0/beta;
-	for(i=0;i<qtsteps;i++){
-		// printf("%d\n", i);
-		montecarlo(Spins, T,h);
-		// ene.data[i][1]=eneSys(Spins,T,h);
-	}
-		mag.data[j][1]=magnet(Spins);
-		printf("%f\n", mag.data[j][1]);
-		mag.data[j][0]=beta;
-		beta=beta+dbeta;
-}	// sprintf(filename, "data/ene.dat");
-	sprintf(filename, "data/mag.dat");
- // mtxsave(filename, ene);
+ char filename[100];
+ int qtdata;
+
+ mtx Spins=genSpins(Nrow, Ncol,0.0), oldSpins;
+//  setSpins(Spins, 1.0);
+ float bound[4]={1.0, 1.0,1.0,1.0};
+ setBound(Spins, bound);
+ int i,count;
+ h=0.0;
+
+ betaStart=0.01;
+ betaStop=1.01;
+ dbeta=0.04;
+ qtdata=(betaStop-betaStart)/dbeta+1;
+ beta=betaStart;
+
+ // Tstart=0.01;
+ // Tstop=100.01;
+ // dT=2.;
+ // qtdata=(Tstop-Tstart)/dT+1;
+ // T=Tstart;
+
+ mtx mag=nullmatrix(qtdata, 2);
+ count=0;
+ for(count=0; count<qtdata; count++){
+ 	setSpins(Spins,1.0);
+ 	T=1.0/beta;
+ 	for(i=0;i<qtsteps;i++){
+ 		montecarlo(Spins, T,h);
+ 	}
+ 	printf("%d\n", count);
+ 	mag.data[count][1]=magnet(Spins);
+ 	mag.data[count][0]=beta;
+ 	// mag.data[count][0]=T;
+  // T=T+dT;
+  beta=beta+dbeta;
+ }
+ sprintf(filename, "data/mag.dat");
  mtxsave(filename, mag);
-
- // printf("nome %.0f\n", T);
-	// sprintf(filename, "data/spins-h-%.0f.dat",h);
-	// printf("%s\n", filename);
- // mtxsave(filename, Spins);
- // memset(filename,0,sizeof(filename));
-// }
-
-
-
 
 
 }
