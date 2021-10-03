@@ -7,48 +7,48 @@
 
 
 mtx genSpins(int nrow, int ncol, float bound){
-	int Nrow=nrow+2;
-	int Ncol=ncol+2;
-	int value;
-	float random;
-	mtx Spins = crystalmatrix(Nrow,Ncol,bound);
-	for(int i=1; i<Nrow-1; i++){
-		for(int j=1; j<Ncol-1; j++){
-			random=rand()%10000/10000.0;
+ int Nrow=nrow+2;
+ int Ncol=ncol+2;
+ int value;
+ float random;
+ mtx Spins = crystalmatrix(Nrow,Ncol,bound);
+ for(int i=1; i<Nrow-1; i++){
+  for(int j=1; j<Ncol-1; j++){
+   random=rand()%10000/10000.0;
    if(random<0.5){
-   	value=1;
+    value=1;
    }
    else{
-   	value=-1;
+    value=-1;
    }
-			Spins.data[i][j]=value;
-		}
-	}
-	return(Spins);
+   Spins.data[i][j]=value;
+  }
+ }
+ return(Spins);
 }
 
 
 float eneSys(mtx spins, float T, float h){
-	float energy=0.0;
-	int Nrow=spins.nrows;
+ float energy=0.0;
+ int Nrow=spins.nrows;
  int Ncol=spins.ncols;
-	int i,j;
-	for(i=1;i<Nrow;i++){
-		for(j=1;j<Ncol;j++){
-			energy=energy-1.0/T*spins.data[i][j]*(spins.data[i-1][j]+spins.data[i][j-1]);
-			// energy=energy-spins.data[i][j]*(spins.data[i-1][j]+spins.data[i][j-1]);
-			energy=energy-h*spins.data[i][j];
-		}
-	}
-	for(i=1;i<Ncol;i++){
-		energy=energy-1.0/T*spins.data[Nrow-1][i]*spins.data[Nrow-2][i];
-		// energy=energy-spins.data[Nrow-1][i]*spins.data[Nrow-2][i];
-	}
-	for(i=1;i<Nrow;i++){
-		energy=energy-1.0/T*spins.data[i][Ncol-1]*spins.data[i][Ncol-2];
-		// energy=energy-spins.data[i][Ncol-1]*spins.data[i][Ncol-2];
-	}
-	return(energy);
+ int i,j;
+ for(i=1;i<Nrow;i++){
+  for(j=1;j<Ncol;j++){
+   energy=energy-1.0/T*spins.data[i][j]*(spins.data[i-1][j]+spins.data[i][j-1]);
+   // energy=energy-spins.data[i][j]*(spins.data[i-1][j]+spins.data[i][j-1]);
+   energy=energy-h*spins.data[i][j];
+  }
+ }
+ for(i=1;i<Ncol;i++){
+  energy=energy-1.0/T*spins.data[Nrow-1][i]*spins.data[Nrow-2][i];
+  // energy=energy-spins.data[Nrow-1][i]*spins.data[Nrow-2][i];
+ }
+ for(i=1;i<Nrow;i++){
+  energy=energy-1.0/T*spins.data[i][Ncol-1]*spins.data[i][Ncol-2];
+  // energy=energy-spins.data[i][Ncol-1]*spins.data[i][Ncol-2];
+ }
+ return(energy);
 }
 
 void montecarlo(mtx spins,float T, float h){
@@ -58,53 +58,53 @@ void montecarlo(mtx spins,float T, float h){
  float eneAft, eneBef, random, deltaEne, value;
  eneBef=eneSys(spins,T,h);
  for(int i=0;i<Nrow*Ncol;i++){
- 	posi=rand()%(Nrow*Ncol);
-	 row=posi%(Nrow)+1;
- 	col=(int) (posi-row)/(Nrow)+1.1;
+  posi=rand()%(Nrow*Ncol);
+  row=posi%(Nrow)+1;
+  col=(int) (posi-row)/(Nrow)+1.1;
 
- 	// row=rand()%Nrow+1;
- 	// col=rand()%Ncol+1;
+  // row=rand()%Nrow+1;
+  // col=rand()%Ncol+1;
 
-	 eneBef=eneSys(spins, T,h);
+  eneBef=eneSys(spins, T,h);
   spins.data[row][col]=-spins.data[row][col];
   eneAft=eneSys(spins,T,h);
   deltaEne=eneAft-eneBef;
   random=rand()%1000/1000.0;
   if(random<expf(-deltaEne)){
   // if(random<expf(-1.0/T*deltaEne)){
-  	// eneBef=eneAft;
-  	// printf("aceito\n");
+   // eneBef=eneAft;
+   // printf("aceito\n");
   }
   else{
-  	// eneAft=eneBef;
-	  spins.data[row][col]=-spins.data[row][col];
+   // eneAft=eneBef;
+   spins.data[row][col]=-spins.data[row][col];
   }
  }
 }
 
 float magnet(mtx spins){
-	int Nrow=spins.nrows-2;
-	int Ncol=spins.ncols-2;
-	int i,j;
-	// float* data=(float *)malloc(2*sizeof(float));
+ int Nrow=spins.nrows-2;
+ int Ncol=spins.ncols-2;
+ int i,j;
+ // float* data=(float *)malloc(2*sizeof(float));
  float mag=0.0, absMag=0.0;
  int qt=0;
-	for(i=1;i<Nrow+1;i++){
-		for(j=1;j<Ncol+1;j++){
-		 mag=mag+spins.data[i][j];
-		}
-	}
-	return(mag/(Nrow*Ncol));
+ for(i=1;i<Nrow+1;i++){
+  for(j=1;j<Ncol+1;j++){
+   mag=mag+spins.data[i][j];
+  }
+ }
+ return(mag/(Nrow*Ncol));
 }
 void setSpins(mtx spins, float value){
  int nrow=spins.nrows;
-	int ncol=spins.ncols;
+ int ncol=spins.ncols;
  int i, j;
-	for(i=1; i<nrow-1; i++){
-		for(j=1; j<ncol-1; j++){
-			spins.data[i][j]=value;
-		}
-	}
+ for(i=1; i<nrow-1; i++){
+  for(j=1; j<ncol-1; j++){
+   spins.data[i][j]=value;
+  }
+ }
 }
 
 void setBound(mtx spins, float* bound){
@@ -112,12 +112,12 @@ void setBound(mtx spins, float* bound){
  int i;
  int ncol=spins.ncols, nrow=spins.nrows;
  for(i=1; i<nrow-1; i++){
- 	spins.data[i][0]=left;
- 	spins.data[i][ncol-1]=right;
+  spins.data[i][0]=left;
+  spins.data[i][ncol-1]=right;
  }
  for(i=1; i<ncol-1; i++){
- 	spins.data[0][i]=up;
- 	spins.data[nrow-1][i]=down;
+  spins.data[0][i]=up;
+  spins.data[nrow-1][i]=down;
  }
 }
 
@@ -147,50 +147,50 @@ int main(){
  qtMean=5;
  T=5.3;
  for(h=0.0; h<hmax; h=h+dh){
- 	for(i=0;i<qtsteps;i++){
- 		montecarlo(Spins, T,h);
- 	}
- 	meanMag=0.0;
- 	for(i=0;i<qtMean;i++){
- 		meanMag=meanMag+magnet(Spins);
- 		montecarlo(Spins, T,h);
- 	}
+  for(i=0;i<qtsteps;i++){
+   montecarlo(Spins, T,h);
+  }
+  meanMag=0.0;
+  for(i=0;i<qtMean;i++){
+   meanMag=meanMag+magnet(Spins);
+   montecarlo(Spins, T,h);
+  }
   meanMag=meanMag/qtMean;
- 	printf("%d %f %f \n", count,h,meanMag);
- 	mag.data[count][1]=meanMag;
- 	mag.data[count][0]=h;
+  printf("%d %f %f \n", count,h,meanMag);
+  mag.data[count][1]=meanMag;
+  mag.data[count][0]=h;
   count++;
  }
 
  for(; h>hmin; h=h-dh){
- 	for(i=0;i<qtsteps;i++){
- 		montecarlo(Spins, T,h);
- 	}
- 	meanMag=0.0;
- 	for(i=0;i<qtMean;i++){
- 		meanMag=meanMag+magnet(Spins);
- 		montecarlo(Spins, T,h);
- 	}
+  for(i=0;i<qtsteps;i++){
+   montecarlo(Spins, T,h);
+  }
+  meanMag=0.0;
+  for(i=0;i<qtMean;i++){
+   meanMag=meanMag+magnet(Spins);
+   montecarlo(Spins, T,h);
+  }
   meanMag=meanMag/qtMean;
- 	printf("%d %f %f \n", count,h,meanMag);
- 	mag.data[count][1]=meanMag;
- 	mag.data[count][0]=h;
+  printf("%d %f %f \n", count,h,meanMag);
+  mag.data[count][1]=meanMag;
+  mag.data[count][0]=h;
   count++;
  }
 
  for(; h<hmax; h=h+dh){
- 	for(i=0;i<qtsteps;i++){
- 		montecarlo(Spins, T,h);
- 	}
- 	meanMag=0.0;
- 	for(i=0;i<qtMean;i++){
- 		meanMag=meanMag+magnet(Spins);
- 		montecarlo(Spins, T,h);
- 	}
+  for(i=0;i<qtsteps;i++){
+   montecarlo(Spins, T,h);
+  }
+  meanMag=0.0;
+  for(i=0;i<qtMean;i++){
+   meanMag=meanMag+magnet(Spins);
+   montecarlo(Spins, T,h);
+  }
   meanMag=meanMag/qtMean;
- 	printf("%d %f %f \n", count,h,meanMag);
- 	mag.data[count][1]=meanMag;
- 	mag.data[count][0]=h;
+  printf("%d %f %f \n", count,h,meanMag);
+  mag.data[count][1]=meanMag;
+  mag.data[count][0]=h;
   count++;
  }
 
