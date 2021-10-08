@@ -33,18 +33,18 @@ float eneSys(mtx spins, float T, float h){
  int Nrow=spins.nrows;
  int Ncol=spins.ncols;
  int i,j;
- for(i=1;i<Nrow;i++){
-  for(j=1;j<Ncol;j++){
+ for(i=1;i<Nrow-1;i++){
+  for(j=1;j<Ncol-1;j++){
    energy=energy-1.0/T*spins.data[i][j]*(spins.data[i-1][j]+spins.data[i][j-1]);
    // energy=energy-spins.data[i][j]*(spins.data[i-1][j]+spins.data[i][j-1]);
    energy=energy-h*spins.data[i][j];
   }
  }
- for(i=1;i<Ncol;i++){
+ for(i=1;i<Ncol-1;i++){
   energy=energy-1.0/T*spins.data[Nrow-1][i]*spins.data[Nrow-2][i];
   // energy=energy-spins.data[Nrow-1][i]*spins.data[Nrow-2][i];
  }
- for(i=1;i<Nrow;i++){
+ for(i=1;i<Nrow-1;i++){
   energy=energy-1.0/T*spins.data[i][Ncol-1]*spins.data[i][Ncol-2];
   // energy=energy-spins.data[i][Ncol-1]*spins.data[i][Ncol-2];
  }
